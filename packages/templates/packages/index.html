@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tour Package Search</title>
+    <style>
+        .search-container {
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        .search-box {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .results-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .package-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .package-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .package-price {
+            color: #e44d26;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <form method="GET" action="{% url 'index' %}">
+            <input type="text" 
+                   name="q" 
+                   class="search-box" 
+                   placeholder="Search tour packages..."
+                   value="{{ query }}">
+        </form>
+    </div>
+    <div class="results-container">
+        {% if results %}
+            {% for package in results %}
+                <div class="package-card">
+                    <div class="package-title">{{ package.title }}</div>
+                    <div>Duration: {{ package.duration }}</div>
+                    <div>Airline: {{ package.airline }}</div>
+                    <div class="package-price">Price: {{ package.price }}</div>
+                </div>
+            {% endfor %}
+        {% elif query %}
+            <p>No results found for "{{ query }}"</p>
+        {% endif %}
+    </div>
+</body>
+</html> 

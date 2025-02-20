@@ -10,7 +10,7 @@ from .models import TourPackage
 def load_vector_store():
     """Load the saved vector store"""
     embeddings = OpenAIEmbeddings(
-        model="text-embedding-3-large",
+        model="text-embedding-3-small",
     )
     vector_store = FAISS.load_local(
         "data/vector_store",
@@ -28,16 +28,12 @@ def index(request):
         # Load vector store
         vector_store = load_vector_store()
 
-        # Enhance the query with context
-        enhanced_query = f"Find travel packages related to: {query}"
-
-        # Search similar packages with MMR
-        similar_docs = vector_store.max_marginal_relevance_search(
-            enhanced_query,
+        # Search similar packages
+        similar_docs = vector_store.similarity_search(
+            query,
             k=10,  # Return top 10 results
-            fetch_k=20,  # Fetch more candidates for diversity
-            lambda_mult=0.7,  # Balance between relevance (1.0) and diversity (0.0)
         )
+
         # Extract results
         results = [doc.metadata for doc in similar_docs]
 
