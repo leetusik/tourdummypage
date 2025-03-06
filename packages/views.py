@@ -7,6 +7,25 @@ from .models import TourPackage
 # Create your views here.
 
 
+def get_results(query):
+    """Get results from the search index"""
+    vector_store = load_vector_store()
+
+    # The query is already enhanced with "kimchi" from the API
+    enhanced_query = f"Find travel packages related to: {query}"
+
+    # Search similar packages with MMR
+    similar_docs = vector_store.max_marginal_relevance_search(
+        enhanced_query,
+        k=10,
+        fetch_k=30,
+        lambda_mult=1.0,
+    )
+    # Get the document metadata for each result
+    results = [doc.metadata for doc in similar_docs]
+    return results
+
+
 def load_vector_store():
     """Load the saved vector store"""
     embeddings = OpenAIEmbeddings(
@@ -25,20 +44,7 @@ def index(request):
     results = []
 
     if query:
-        # Load vector store
-        vector_store = load_vector_store()
 
-        # The query is already enhanced with "kimchi" from the API
-        enhanced_query = f"Find travel packages related to: {query}"
-
-        # Search similar packages with MMR
-        similar_docs = vector_store.max_marginal_relevance_search(
-            enhanced_query,
-            k=10,
-            fetch_k=30,
-            lambda_mult=1.0,
-        )
-        # Get the document metadata for each result
-        results = [doc.metadata for doc in similar_docs]
+        results = get_results(query)
 
     return render(request, "packages/index.html", {"results": results, "query": query})

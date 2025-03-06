@@ -47,7 +47,18 @@
                value="{{ query }}">
     </div>
     <div class="results-container" id="resultsContainer">
-        <!-- Results will be inserted here dynamically -->
+        {% if results %}
+            {% for package in results %}
+                <div class="package-card">
+                    <div class="package-title">{{ package.title }}</div>
+                    <div>Duration: {{ package.duration }}</div>
+                    <div>Airline: {{ package.airline }}</div>
+                    <div class="package-price">Price: {{ package.price }}</div>
+                </div>
+            {% endfor %}
+        {% elif query %}
+            <p>No results found for "{{ query }}"</p>
+        {% endif %}
     </div>
 
     <script>
@@ -70,7 +81,8 @@
         // Function to handle the API call
         async function handleSearch(keyword) {
             try {
-                const response = await fetch('/api/kimchi/', {
+                // First, call the kimchi API to enhance the keyword
+                const kimchiResponse = await fetch('http://localhost:8000/api/kimchi/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -80,19 +92,14 @@
                     })
                 });
                 
-                const data = await response.json();
+                const kimchiData = await kimchiResponse.json();
                 
-                // Display the API response
-                if (data.response) {
+                if (kimchiData.response) {
+                    // Use the enhanced keyword to search for packages
+                    window.location.href = `/?q=${encodeURIComponent(kimchiData.response)}`;
+                } else if (kimchiData.error) {
                     resultsContainer.innerHTML = `
-                        <div class="package-card">
-                            <div class="package-title">API Response</div>
-                            <div>${data.response}</div>
-                        </div>
-                    `;
-                } else if (data.error) {
-                    resultsContainer.innerHTML = `
-                        <p>Error: ${data.error}</p>
+                        <p>Error: ${kimchiData.error}</p>
                     `;
                 }
             } catch (error) {
@@ -108,10 +115,8 @@
             const keyword = e.target.value.trim();
             if (keyword) {
                 handleSearch(keyword);
-            } else {
-                resultsContainer.innerHTML = '';
             }
-        }, 300));
+        }, 500));
     </script>
 </body>
 </html>

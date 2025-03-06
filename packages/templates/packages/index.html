@@ -40,78 +40,27 @@
 </head>
 <body>
     <div class="search-container">
-        <input type="text" 
-               id="searchInput" 
-               class="search-box" 
-               placeholder="Search tour packages..."
-               value="{{ query }}">
+        <form method="GET" action="{% url 'index' %}">
+            <input type="text" 
+                   name="q" 
+                   class="search-box" 
+                   placeholder="Search tour packages..."
+                   value="{{ query }}">
+        </form>
     </div>
-    <div class="results-container" id="resultsContainer">
-        <!-- Results will be inserted here dynamically -->
+    <div class="results-container">
+        {% if results %}
+            {% for package in results %}
+                <div class="package-card">
+                    <div class="package-title">{{ package.title }}</div>
+                    <div>Duration: {{ package.duration }}</div>
+                    <div>Airline: {{ package.airline }}</div>
+                    <div class="package-price">Price: {{ package.price }}</div>
+                </div>
+            {% endfor %}
+        {% elif query %}
+            <p>No results found for "{{ query }}"</p>
+        {% endif %}
     </div>
-
-    <script>
-        const searchInput = document.getElementById('searchInput');
-        const resultsContainer = document.getElementById('resultsContainer');
-
-        // Debounce function to limit API calls
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Function to handle the API call
-        async function handleSearch(keyword) {
-            try {
-                const response = await fetch('http://localhost:8000/api/kimchi/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        keyword: keyword
-                    })
-                });
-                
-                const data = await response.json();
-                
-                // Display the API response
-                if (data.response) {
-                    resultsContainer.innerHTML = `
-                        <div class="package-card">
-                            <div class="package-title">API Response</div>
-                            <div>${data.response}</div>
-                        </div>
-                    `;
-                } else if (data.error) {
-                    resultsContainer.innerHTML = `
-                        <p>Error: ${data.error}</p>
-                    `;
-                }
-            } catch (error) {
-                resultsContainer.innerHTML = `
-                    <p>Error connecting to the server</p>
-                `;
-                console.error('Error:', error);
-            }
-        }
-
-        // Add event listener with debounce
-        searchInput.addEventListener('input', debounce((e) => {
-            const keyword = e.target.value.trim();
-            if (keyword) {
-                handleSearch(keyword);
-            } else {
-                resultsContainer.innerHTML = '';
-            }
-        }, 300));
-    </script>
 </body>
-</html>
+</html> 
