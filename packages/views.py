@@ -28,17 +28,17 @@ def index(request):
         # Load vector store
         vector_store = load_vector_store()
 
-        # Enhance the query with context
+        # The query is already enhanced with "kimchi" from the API
         enhanced_query = f"Find travel packages related to: {query}"
 
         # Search similar packages with MMR
         similar_docs = vector_store.max_marginal_relevance_search(
             enhanced_query,
-            k=10,  # Return top 10 results
-            fetch_k=20,  # Fetch more candidates for diversity
-            lambda_mult=0.7,  # Balance between relevance (1.0) and diversity (0.0)
+            k=10,
+            fetch_k=30,
+            lambda_mult=1.0,
         )
-        # Extract results
+        # Get the document metadata for each result
         results = [doc.metadata for doc in similar_docs]
 
     return render(request, "packages/index.html", {"results": results, "query": query})

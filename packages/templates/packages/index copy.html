@@ -70,7 +70,7 @@
         // Function to handle the API call
         async function handleSearch(keyword) {
             try {
-                const response = await fetch('http://localhost:8000/api/kimchi/', {
+                const response = await fetch('/api/kimchi/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
